@@ -70,26 +70,31 @@ def serve(
     - stdio: Standard MCP communication via stdin/stdout
     - http: HTTP server with Streamable HTTP for web-based clients
     """
+    log_to_stderr = transport == "stdio"
+
+    def log(message: str) -> None:
+        click.echo(message, err=log_to_stderr)
+
     if debug:
-        click.echo("Debug mode enabled")
+        log("Debug mode enabled")
 
     actual_docs_path = docs_path if docs_path else get_default_docs_path()
     server_instance = TypstDocumentationServer(actual_docs_path)
 
     if docs_path:
-        click.echo(f"Using custom documentation path: {docs_path}")
+        log(f"Using custom documentation path: {docs_path}")
     else:
-        click.echo(f"Using default documentation path: {TYPST_VERSION}/")
+        log(f"Using default documentation path: {TYPST_VERSION}/")
 
-    click.echo("\nAvailable tools:")
-    click.echo("  • typst_search - Search through documentation")
-    click.echo("  • typst_browse - Browse directory structure")
-    click.echo("  • typst_read - Read specific documentation files")
+    log("\nAvailable tools:")
+    log("  - typst_search - Search through documentation")
+    log("  - typst_browse - Browse directory structure")
+    log("  - typst_read - Read specific documentation files")
 
     if transport == "http":
-        click.echo(f"\nStarting HTTP server on http://{host}:{port}")
-        click.echo("Available endpoints:")
-        click.echo(f"  • HTTP  http://{host}:{port}/mcp - MCP over HTTP endpoint")
+        log(f"\nStarting HTTP server on http://{host}:{port}")
+        log("Available endpoints:")
+        log(f"  - HTTP  http://{host}:{port}/mcp - MCP over HTTP endpoint")
 
         session_manager = StreamableHTTPSessionManager(
             app=server_instance.server,
@@ -110,9 +115,9 @@ def serve(
 
         uvicorn.run(starlette_app, host=host, port=port)
     else:  # stdio
-        click.echo("\nStarting Typst MCP Server...")
-        click.echo("Server will communicate via stdio (MCP standard)")
-        click.echo("Server ready. Waiting for MCP client connection...")
+        log("\nStarting Typst MCP Server...")
+        log("Server will communicate via stdio (MCP standard)")
+        log("Server ready. Waiting for MCP client connection...")
 
         async def async_main() -> None:
             async with stdio_server() as (read_stream, write_stream):
