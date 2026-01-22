@@ -113,10 +113,10 @@ class TypstDocumentationServer:
                         matches.append({"line": i + 1, "context": context})
 
                 if matches:
-                    relative_path = file_path.relative_to(self.docs_path)
+                    relative_path = file_path.relative_to(self.docs_path).as_posix()
                     results.append(
                         {
-                            "file": str(relative_path),
+                            "file": relative_path,
                             "matches": matches[:3],  # Limit to first 3 matches per file
                         }
                     )
